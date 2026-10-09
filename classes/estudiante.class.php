@@ -1,94 +1,80 @@
-<?php 
-require_once("classes/com.class.php"); 
-require_once("classes/validaciones.inc.php"); 
-
-class Estudiante { 
-    public $idestudiante; 
-    public $fechanacimiento; 
-    public $estadoregistroestudiante; 
-    public $idgenero; 
-    public $conexion; 
-    public $validacion; 
-
-    // Constructor para inicializar las clases en un objeto nuevo
-    public function __construct() {
-        $this->conexion = new DB(); 
-        $this->validacion = new Validaciones(); 
+<?php
+require("classes/conn.class.php");
+require("classes/validaciones.inc.php");
+class Estudiante{
+    public $idestudiante;
+    public $fechanacimiento;
+    public $estadoregistroestudiante;
+    public $idgenero;
+    public $conexion; //OBJETO DE CONEXION
+    public $validacion; //OBJETO DE VALIACION
+    
+    public function __construct(){
+        $this->conexion = new DB();
+        $this->validacion = new Validaciones();
     }
-
-    public function __clone() { 
-        $this->conexion = new DB(); 
-        $this->validacion = new Validaciones(); 
-    } 
-
-    public function setIdestudiante($idestudiante) { 
-        $this->idestudiante = intval($idestudiante); 
-    } 
-
-    public function getIdestudiante() { 
-        return intval($this->idestudiante); 
-    } 
-
-    public function setFechanacimiento($fechanacimiento) { 
-        $this->fechanacimiento = $fechanacimiento; 
-    } 
-
-    public function getFechanacimiento() { 
-        return $this->fechanacimiento; 
-    } 
-
-    public function setIdgenero($idgenero) { 
-        $this->idgenero = $idgenero; 
-    } 
-
-    public function getIdgenero() { 
-        return $this->idgenero; 
-    } 
-
-    public function obtenerEstudiante(int $idestudiante) { 
-        // Asignamos el ID limpio usando el método de la clase
-        $this->setIdestudiante($idestudiante); 
-        
-        if ($this->idestudiante > 0) { 
-            // Se asume que tu clase DB maneja PDO o similar y requiere preparar la consulta
-            // Esto previene Inyección SQL
-            $stmt = $this->conexion->prepare('SELECT * FROM estudiante WHERE id_estudiante = :id');
-            $stmt->execute(['id' => $this->idestudiante]);
-            $resultado = $stmt->fetch();
-
-            return array(
-                "mensaje" => "Registros encontrados", 
-                "valores" => $resultado
-            ); 
-        } else { 
-            return array(
-                "mensaje" => "No se puede ejecutar la consulta, el parámetro ID es incorrecto","valores" => ""
-            ); 
-        } 
-    } 
-
-    public function obtenerEstudiantes() { 
-        // Se asume el uso de un método query() en tu clase de conexión
-        $stmt = $this->conexion->query('SELECT * FROM estudiante;'); 
-        $resultado = $stmt->fetchAll(); // fetchAll para traer todos los registros
-
-        return array(
-            "mensaje" => "Registros encontrados", 
-            "valores" => $resultado
-        ); 
-    } 
-
-    public function nuevosEstudiante($fechanacimiento,$idgenero) { 
-        if(!empty($fechanacimiento)and !empty($idestudiante)) {
+    
+    public function idestudiante($idestudiante){
+        $this->idestudiante = intval($idestudiante);
+    }
+    
+    public function getIdEstudiante(){
+        return intval($this->idestudiante);
+    }
+    
+    public function setFechaNacimiento($fechanacimiento){
+        $this->fechanacimiento = $fechanacimiento;
+    }
+    
+    public function getFechaNacimiento(){
+        return $this->fechanacimiento;
+    }
+    
+    public function idgenero($idgenero){
+        $this->idgenero = $idgenero;
+    }
+    
+    public function getIdGenero(){
+        return $this->idgenero;
+    }
+    
+    //MTODO PARA OBTENER EL REGISTRO DE UN UNICO ESTUDIANTE
+    public function obtenerEstudiante(int $idestudiante){
+        $this->idestudiante($idestudiante);
+        if($this->idestudiante > 0){
+            $resultado = $this->conexion->run('SELECT * FROM estudiante WHERE id_estudiante='.$this->idestudiante.';');
+            $array = array("mensaje"=>"Registros encontrados","Valores"=>$resultado->fetch());
+            return $array;
+        }else{
+            return array("mensaje"=>"No se puede ejecutar la consulta, el parametro ID es incorrecto","Valores"=>"");
+        }
+    }
+    
+    //MTODO PARA OBTENER LOS REGISTROS DE TODOS LOS ESTUDIANTES
+    public function obtenerEstudiantes(){
+        $resultado = $this->conexion->run('SELECT * FROM estudiante;');
+        $array = array("mensaje"=>"Registros encontrados","Valores"=>$resultado->fetch());
+        return $array;
+    }
+    
+    //MTODO PARA INSERTAR UN REGISTRO DE ESTUDIANTE
+    public function nuevoEstudiante($fechanacimiento,$idgenero){
+        if(!empty($fechanacimiento) and !empty($idgenero)){
             $parametros = array(
-                "fecha nacimiento" => $fechanacimiento,
-                "id_genero"=> $idgenero,
+                "fecha_nac" => $fechanacimiento,
+                "id_genero" => $idgenero
             );
-            $resultado = $this->conexion('INSERT INTO estudiante(fecha_nacmiento_estudiante,id_genero)VALUES(:fecha_nac,:id_genero);'.$parametros);
-
-    }else{
-        return array("mensaje"=> "No se puedo realizar eel insert","Valores"=>"");
-    } 
+            $resultado = $this->conexion->run('INSERT INTO estudiante(fecha_nacimiento_estudiante,id_genero)VALUES(:fecha_nac,:id_genero);',$parametros);
+            if($this->conexion->n > 0 and $this->conexion->id > 0){
+                $resultado = $this->obtenerEstudiante($this->conexion->id);
+                $array = array("mensaje"=>"Registros encontrados","Valores"=>$resultado["Valores"]);
+                return $array;
+            }else{
+                return array("mensaje"=>"No se pudo realizar el insert","Valores"=>"");
+            }
+        }else{
+            return array("mensaje"=>"Parametro enviados vacios","Valores"=>"");
+        }
     }
 }
 ?>
