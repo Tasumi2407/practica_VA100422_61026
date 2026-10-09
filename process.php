@@ -12,7 +12,7 @@ $Estudiante = new Estudiante();
 //PREGUNTO POR EL METODO ENVIADO
 if($_SERVER["REQUEST_METHOD"] === "GET"){
     //OBTENGO EL VALOR DEL PARAMETRO ENVIADO
-    $tipo_peticion = ((isset($_GET["t"])) ? (($_GET["t"])!="" ? $_GET : null): null);
+    $tipo_peticion = ((isset($_GET["t"])) ? (($_GET["t"]!="") ? $_GET["t"] : null): null);
     switch($tipo_peticion){
         case "selectAll":
             $resultado = $Estudiante ->obtenerEstudiantes();
@@ -31,7 +31,7 @@ if($_SERVER["REQUEST_METHOD"] === "GET"){
             if(array_key_exists("fecha_nac",$_GET) and array_key_exists("id_genero",$_GET)){
                 //SI SE ENVIARON VALORES DESDE EL METODO GET
                 if($_GET["fecha_nac"]!="" and $_GET["id_genero"]!=""){
-                    $resultado = $Estudiante->nuevosEstudiante($_GET["fecha_nac"],$_GET["id_genero"]);
+                    $resultado = $Estudiante->nuevoEstudiante($_GET["fecha_nac"],$_GET["id_genero"]);
                 }else{
                     //UNO DE LOS PARAMETROS ENVIADOS NO POSEE VALORES
                     header('HTTP/1.1 400 Bad Request');
@@ -53,7 +53,7 @@ if($_SERVER["REQUEST_METHOD"] === "GET"){
             if(array_key_exists("fecha_nac",$_POST) and array_key_exists("id_genero",$_POST)){
                 //SI SE ENVIARON VALORES DESDE EL METODO GET
                 if($_POST["fecha_nac"]!="" and $_POST["id_genero"]!=""){
-                    $resultado = $Estudiante->nuevosEstudiante($_POST["fecha_nac"],$_POST["id_genero"]);
+                    $resultado = $Estudiante->nuevoEstudiante($_POST["fecha_nac"],$_POST["id_genero"]);
                 }else{
                     //UNO DE LOS PARAMETROS ENVIADOS NO POSEE VALORES
                     header('HTTP/1.1 400 Bad Request');
